@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { speechLocaleForLanguage } from "@/lib/translations";
 
 type SpeechContextValue = {
   activeId: string | null;
@@ -10,6 +12,7 @@ type SpeechContextValue = {
 const SpeechContext = createContext<SpeechContextValue | null>(null);
 
 export function SpeechProvider({ children }: { children: React.ReactNode }) {
+  const { language: appLanguage } = useLanguage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
 
@@ -18,7 +21,7 @@ export function SpeechProvider({ children }: { children: React.ReactNode }) {
     setActiveId(null);
   }, []);
 
-  const speak = useCallback((id: string, text: string, rate = 90, language = "en-US") => {
+  const speak = useCallback((id: string, text: string, rate = 90, language = speechLocaleForLanguage(appLanguage)) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -29,7 +32,7 @@ export function SpeechProvider({ children }: { children: React.ReactNode }) {
     setActiveId(id);
     window.speechSynthesis.speak(utterance);
     return true;
-  }, []);
+  }, [appLanguage]);
 
   useEffect(() => () => {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();

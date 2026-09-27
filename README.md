@@ -16,6 +16,7 @@ graph LR
 - **Frontend:** React, TypeScript, Tailwind CSS, Wouter routes, and the template's accessible UI components.
 - **Backend:** Express + tRPC with Manus OAuth. Feature procedures require an authenticated user and filter records by that user's ID.
 - **Persistence:** Drizzle ORM over MySQL/TiDB. User profiles, daily activities, and familiar-person details persist in separate tables.
+- **Localization:** English and Arabic interface options; Arabic uses right-to-left layout, Gregorian calendar formatting, localized deterministic schedule answers, and the selected browser speech locale. Language preference is stored on the user's existing care profile; no additional schema migration is needed.
 - **Branding:** The supplied We Care wordmark is held in project storage and displayed by `client/src/components/BrandLockup.tsx`. The source archive includes a cropped `we-care-logo.jpg`; for a different deployment, upload it to that project's storage and update the component's storage path.
 - **Photos:** Sent to the server only after the caregiver checks the consent acknowledgment; the server also enforces that acknowledgment, verifies JPEG/PNG/WebP byte signatures, and limits uploads to 5 MB after client-side resizing. Photos are stored in private object storage and referenced by a user-scoped key. The browser receives a short-lived signed URL only after an authenticated ownership check.
 - **AI:** No external AI model is connected. The companion is explicitly in **demo mode**: its schedule answers are generated on the server from the signed-in user's saved activities, and it says when information is absent. It does not diagnose, recommend treatment, or invent appointments.
@@ -31,6 +32,7 @@ graph LR
 - Truthful manual recognition fallback; no claim of face identity.
 - Schedule-aware demo companion, repeated answers via text-to-speech, stop/restart control, configurable speech rate, and optional browser speech input.
 - Tap-to-dictate for profile, activity, and familiar-person text fields on browsers that support Web Speech recognition; spoken text appends to existing text, and typing remains available. Audio processing and permissions are controlled by the user's browser/device, not this app.
+- English/Arabic language switching on the landing page, during onboarding, and in settings; the choice is saved to the signed-in care profile and updates layout direction, dates, assistant replies, and browser speech locale.
 - Browser notification permission flow and foreground reminders with duplicate suppression. No background push service is configured.
 - Caregiver/support-person interface view, help, privacy explanation, and preference settings.
 - Sample records are tagged as demo data; reset removes only those tagged sample activities/people, not user-created records. Editing or completing a sample converts it to a user-owned record so a later reset will keep that work.
@@ -69,7 +71,7 @@ pnpm test
 pnpm build
 ```
 
-Automated tests cover local-time date boundaries, date validation, cross-month/year date arithmetic, schedule-grounded answers, empty schedules, medical-question redirection, and the template logout behavior.
+Automated tests cover local-time date boundaries, date validation, cross-month/year date arithmetic, English/Arabic translation helpers and locale, profile-language allowlisting and language-only persistence, schedule-grounded answers (including Arabic date/safety behavior), empty schedules, medical-question redirection, and the template logout behavior.
 
 ## Deployment
 
@@ -82,7 +84,7 @@ Automated tests cover local-time date boundaries, date validation, cross-month/y
 
 ## Known limitations / real-device checks
 
-- English is the only supported interface and speech language.
+- Browser speech recognition and speech synthesis availability/voice quality vary by browser and device; typing and visual text replies remain available. User-entered names, notes, and saved event titles are not automatically translated when switching languages.
 - The companion is deterministic demo behavior, not a connected generative model. Configure and validate a secure server-side model before describing it as connected AI.
 - Familiar-person recognition is not available until a separately selected, consented, privacy-reviewed recognition provider/model is configured. Current results never claim identity.
 - Browser notifications are foreground-only and depend on browser permission. Do not rely on this app for urgent or medication-critical alerts.

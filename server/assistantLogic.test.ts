@@ -22,4 +22,21 @@ describe("schedule-aware demo companion", () => {
     expect(answerFromSavedSchedule("Should I change the medication dose?", "2026-09-27", schedule, "10:00"))
       .toContain("I can’t give medical advice");
   });
+
+  it("answers Arabic schedule questions from only the supplied saved activities", () => {
+    const arabicSchedule = [
+      { title: "زيارة العائلة", startTime: "15:30", status: "planned" as const },
+      { title: "الغداء", startTime: "12:00", status: "completed" as const },
+    ];
+    const answer = answerFromSavedSchedule("ما التالي اليوم؟", "2026-09-27", arabicSchedule, "10:00", "ar");
+    expect(answer).toContain("هذه الأنشطة المحفوظة");
+    expect(answer).toContain("سبتمبر");
+    expect(answer).toContain("الغداء");
+    expect(answer).toContain("زيارة العائلة");
+  });
+
+  it("keeps the medical safety redirect in Arabic", () => {
+    expect(answerFromSavedSchedule("هل أغير جرعة الدواء؟", "2026-09-27", schedule, "10:00", "ar"))
+      .toContain("لا أستطيع تقديم نصائح طبية");
+  });
 });

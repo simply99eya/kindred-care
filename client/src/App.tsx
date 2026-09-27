@@ -6,6 +6,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
 import CareGate from "./components/CareGate";
+import ProfileLanguageSync from "./components/ProfileLanguageSync";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import { SpeechProvider } from "./contexts/SpeechContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -17,7 +19,8 @@ const AssistantPage = lazy(() => import("./pages/AssistantPage"));
 const HelpPage = lazy(() => import("./pages/HelpPage"));
 
 function PageLoading() {
-  return <main className="page-wrap" role="status" aria-live="polite">Opening your care space…</main>;
+  const { t } = useLanguage();
+  return <main className="page-wrap" role="status" aria-live="polite">{t("Loading…")}</main>;
 }
 
 function ProtectedApp({ children }: { children: React.ReactNode }) {
@@ -38,14 +41,17 @@ function Router() {
 }
 
 export default function App() {
-  return <ErrorBoundary>
-    <ThemeProvider defaultTheme="light">
-      <SpeechProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </SpeechProvider>
-    </ThemeProvider>
-  </ErrorBoundary>;
+  return <ThemeProvider defaultTheme="light">
+    <LanguageProvider>
+      <ErrorBoundary>
+        <SpeechProvider>
+          <TooltipProvider>
+            <Toaster />
+            <ProfileLanguageSync />
+            <Router />
+          </TooltipProvider>
+        </SpeechProvider>
+      </ErrorBoundary>
+    </LanguageProvider>
+  </ThemeProvider>;
 }

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import BrandLockup from "@/components/BrandLockup";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { CalendarDays, CircleHelp, House, LogOut, MessageCircle, PanelLeft, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -51,6 +52,7 @@ export default function DashboardLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -66,10 +68,10 @@ export default function DashboardLayout({
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to open your care space
+              {t("Sign in to open your care space")}
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Your schedule and familiar-person details are available only in your signed-in space.
+              {t("Your schedule and familiar-person details are available only in your signed-in space.")}
             </p>
           </div>
           <Button
@@ -77,7 +79,7 @@ export default function DashboardLayout({
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
-            Sign in
+            {t("Sign in")}
           </Button>
         </div>
       </div>
@@ -109,6 +111,7 @@ function DashboardLayoutContent({
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
+  const { t, dir } = useLanguage();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -127,8 +130,8 @@ function DashboardLayoutContent({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
 
-      const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
-      const newWidth = e.clientX - sidebarLeft;
+      const bounds = sidebarRef.current?.getBoundingClientRect();
+      const newWidth = bounds ? (dir === "rtl" ? bounds.right - e.clientX : e.clientX - bounds.left) : DEFAULT_WIDTH;
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setSidebarWidth(newWidth);
       }
@@ -151,13 +154,16 @@ function DashboardLayoutContent({
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizing, setSidebarWidth]);
+  }, [dir, isResizing, setSidebarWidth]);
 
   return (
     <>
       <div className="relative" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
+          side={dir === "rtl" ? "right" : "left"}
+          mobileTitle={t("Main navigation")}
+          mobileDescription={t("Use the menu on the left to move between your day, calendar, familiar people and the companion.")}
           className="border-r-0"
           disableTransition={isResizing}
         >
@@ -166,7 +172,7 @@ function DashboardLayoutContent({
               <button
                 onClick={toggleSidebar}
                 className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-                aria-label="Toggle navigation"
+                aria-label={t("Toggle navigation")}
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -183,13 +189,13 @@ function DashboardLayoutContent({
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
+                      tooltip={t(item.label)}
                       className={`h-10 transition-all font-normal`}
                     >
                       <item.icon
                         className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
                       />
-                      <span>{item.label}</span>
+                      <span>{t(item.label)}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -222,19 +228,19 @@ function DashboardLayoutContent({
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>{t("Sign out")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
         <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          className={`sidebar-resize-handle absolute top-0 ${dir === "rtl" ? "left-0" : "right-0"} w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
           onMouseDown={() => {
             if (isCollapsed) return;
             setIsResizing(true);
           }}
-          style={{ zIndex: 50 }}
+          style={{ zIndex: 50, right: dir === "rtl" ? "auto" : 0, left: dir === "rtl" ? 0 : "auto" }}
         />
       </div>
 
@@ -242,11 +248,11 @@ function DashboardLayoutContent({
         {isMobile && (
           <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
+              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" aria-label={t("Toggle navigation")} title={t("Toggle navigation")} />
               <div className="flex items-center gap-3">
                 <div className="flex flex-col gap-1">
                   <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "Menu"}
+                    {t(activeMenuItem?.label ?? "Menu")}
                   </span>
                 </div>
               </div>

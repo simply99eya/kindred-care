@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useSpeech } from "@/contexts/SpeechContext";
 import { dateKeyInTimezone } from "@/lib/careDates";
 import { getBrowserSpeechRecognition, type BrowserSpeechRecognition } from "@/lib/browserSpeechRecognition";
@@ -9,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function AssistantPage() {
+  const { language, speechLocale, t } = useLanguage();
   const profileQuery = trpc.care.profile.get.useQuery();
   const profile = profileQuery.data;
   const timezone = profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
@@ -32,45 +34,45 @@ export default function AssistantPage() {
     const clean = question.trim();
     if (!clean || ask.isPending || !dateKey) return;
     setMessages((current) => [...current, { role: "user", content: clean }]);
-    ask.mutate({ message: clean, dateKey }, {
+    ask.mutate({ message: clean, dateKey, language }, {
       onSuccess: (response) => setMessages((current) => [...current, { role: "assistant", content: response.text }]),
-      onError: () => setMessages((current) => [...current, { role: "assistant", content: "I'm sorry, I couldn't read the saved schedule just now. Please try again in a moment." }]),
+      onError: () => setMessages((current) => [...current, { role: "assistant", content: t("I'm sorry, I couldn't read the saved schedule just now. Please try again in a moment.") }]),
     });
   };
 
   const startVoiceInput = () => {
     const Recognition = getBrowserSpeechRecognition();
-    if (!Recognition) { toast.message("Voice input isn't available in this browser. You can type instead."); return; }
+    if (!Recognition) { toast.message(t("Voice input isn't available in this browser. You can type instead.")); return; }
     try {
       const recognition = new Recognition();
       recognitionRef.current = recognition;
-      recognition.lang = "en-US";
+      recognition.lang = speechLocale;
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.onresult = (event) => {
         const transcript = event.results[0]?.[0]?.transcript?.trim();
         if (transcript) sendQuestion(transcript);
       };
-      recognition.onerror = () => toast.error("We couldn't hear that. Please try again or type your question.");
+      recognition.onerror = () => toast.error(t("We couldn't hear that. Please try again or type your question."));
       recognition.onend = () => { setListening(false); recognitionRef.current = null; };
       setListening(true);
       recognition.start();
     } catch {
       setListening(false);
-      toast.error("Voice input couldn't start. Please type your question instead.");
+      toast.error(t("Voice input couldn't start. Please type your question instead."));
     }
   };
 
   const activeIndex = speech.activeId?.startsWith("assistant-message-") ? Number(speech.activeId.replace("assistant-message-", "")) : null;
   const readMessage = (content: string, index: number) => {
-    if (!speech.speak(`assistant-message-${index}`, content, profile?.speechRate ?? 90)) toast.message("Speech isn't available in this browser.");
+    if (!speech.speak(`assistant-message-${index}`, content, profile?.speechRate ?? 90)) toast.message(t("Speech isn't available in this browser."));
   };
 
   return <main className="page-wrap">
-    <div className="assistant-intro"><span className="page-kicker"><Sparkles size={15} /> A friendly guide</span><h1 className="page-title">We Care Companion</h1><p className="page-subtitle">Ask a simple question about the saved plan or how to find something in the app.</p></div>
-    <div className="chat-warning"><strong>Demo guide:</strong> This schedule helper reads only the activities saved for the selected day. It is not connected to an external AI model and does not provide medical advice. If something isn't in the calendar, it will say so.</div>
+    <div className="assistant-intro"><span className="page-kicker"><Sparkles size={15} /> {t("A friendly guide")}</span><h1 className="page-title">{t("We Care Companion")}</h1><p className="page-subtitle">{t("Ask a simple question about the saved plan or how to find something in the app.")}</p></div>
+    <div className="chat-warning"><strong>{t("Demo guide:")}</strong> {t("This schedule helper reads only the activities saved for the selected day. It is not connected to an external AI model and does not provide medical advice. If something isn't in the calendar, it will say so.")}</div>
     <div className="assistant-shell">
-      <div className="settings-row" style={{ padding: "13px 17px", background: "#f8faf5" }}><div><strong><CalendarDays size={15} style={{ verticalAlign: "-3px", marginRight: 6 }} />Ask about a day</strong><small>Answers use saved activities only.</small></div><input className="care-input settings-control" type="date" aria-label="Choose the day for schedule questions" value={dateKey} onChange={(event) => setDateKey(event.target.value)} /></div>
+      <div className="settings-row" style={{ padding: "13px 17px", background: "#f8faf5" }}><div><strong><CalendarDays size={15} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />{t("Ask about a day")}</strong><small>{t("Answers use saved activities only.")}</small></div><input className="care-input settings-control" type="date" aria-label={t("Choose the day for schedule questions")} value={dateKey} onChange={(event) => setDateKey(event.target.value)} /></div>
       <AIChatBox
         className="chat-box"
         messages={messages}
@@ -85,7 +87,7 @@ export default function AssistantPage() {
         onStopReading={speech.stop}
       />
     </div>
-    <div style={{ width: "min(840px, 100%)", margin: "14px auto", display: "flex", justifyContent: "flex-end" }}><Button variant="outline" onClick={startVoiceInput} disabled={!voiceAvailable || listening || ask.isPending} title={voiceAvailable ? "Speak a question" : "Voice input is not available in this browser"}><Mic size={17} />{listening ? "Listening…" : voiceAvailable ? "Ask by voice" : "Voice input unavailable"}</Button>{listening && <Button variant="ghost" onClick={() => { recognitionRef.current?.stop(); setListening(false); }}><MicOff size={17} />Stop</Button>}</div>
-    <div className="chat-warning">For changes to a person's care or medication, please speak with their care team. We Care is a supportive companion, not a medical service.</div>
+    <div className="assistant-voice-controls"><Button variant="outline" onClick={startVoiceInput} disabled={!voiceAvailable || listening || ask.isPending} title={voiceAvailable ? t("Speak a question") : t("Voice input is not available in this browser")}><Mic size={17} />{listening ? t("Listening…") : voiceAvailable ? t("Ask by voice") : t("Voice input unavailable")}</Button>{listening && <Button variant="ghost" onClick={() => { recognitionRef.current?.stop(); setListening(false); }}><MicOff size={17} />{t("Stop")}</Button>}</div>
+    <div className="chat-warning">{t("For changes to a person's care or medication, please speak with their care team. We Care is a supportive companion, not a medical service.")}</div>
   </main>;
 }

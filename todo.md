@@ -4,6 +4,7 @@
 
 - [x] Responsive landing page, authenticated app shell, clear sign-in path, and resumable onboarding.
 - [x] Logo-based We Care branding: supplied wordmark, raspberry/navy palette, matching browser title, and updated public/app copy.
+- [x] English/Arabic language switch on landing, onboarding, and settings; saved profile preference, Arabic right-to-left layout, Gregorian locale formatting, translated assistant responses, and matching browser speech locale.
 - [x] Persistent user profile, daily activities, and familiar-person records.
 - [x] Calendar, daily agenda, activity CRUD, completion controls, and reminder times.
 - [x] Past-day view-only behavior and server-side enforcement for edits, rescheduling, completion, and deletion.
@@ -17,7 +18,7 @@
 - [x] Foreground browser reminders with permission flow, duplicate suppression, and clear warning that this is not an urgent-care channel.
 - [x] Help/settings, privacy explanation, caregiver/support-person view, and accessible keyboard-managed dialogs.
 - [x] Architecture, local run, environment setup, deployment steps, test results, and known limitations documented in `README.md` and `ENVIRONMENT.md`.
-- [x] Verification completed: TypeScript passes; 14/14 Vitest tests pass; production frontend/server build succeeds; desktop and mobile landing/dashboard previews reviewed.
+- [x] Verification completed: TypeScript passes; 23/23 Vitest tests pass; production frontend/server build succeeds; desktop/mobile English and public Arabic previews reviewed.
 - [x] Source archive created with project code/docs and lockfile; dependencies/build artifacts and all dotenv files excluded.
 
 ## Handoff boundaries (informational; do not imply a connected service)
@@ -26,7 +27,7 @@
 
 **Notifications and accounts:** Reminders work while the app is open; no background push service or delivery worker is configured. Each private care space currently belongs to one signed-in account; caregiver invitations and cross-account sharing are not implemented.
 
-**Data retention and language:** Removing a familiar-person profile removes its database reference and in-app access; the storage adapter does not expose underlying-object deletion. English is currently the only interface and voice language.
+**Data retention and language:** Removing a familiar-person profile removes its database reference and in-app access; the storage adapter does not expose underlying-object deletion. The interface supports English and Arabic; user-entered names, notes, and schedule titles remain as entered rather than being automatically translated. Actual voice recognition/synthesis support and quality vary by browser/device.
 
 **Unverified environment checks:** Automated unit/build tests and preview screenshots passed. The sandbox browser did not retain the app's OAuth session for an end-to-end signed-in test, and physical-device camera, microphone, speech, and notification checks remain necessary before real-world use. Those outcomes are intentionally reported as unverified, not as passing.
 

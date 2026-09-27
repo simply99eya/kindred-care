@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2, Send, User, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -134,6 +135,7 @@ export function AIChatBox({
   readingIndex = null,
   onStopReading,
 }: AIChatBoxProps) {
+  const { t } = useLanguage();
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +219,7 @@ export function AIChatBox({
             <div className="flex flex-1 flex-col items-center justify-center gap-6 text-muted-foreground">
               <div className="flex flex-col items-center gap-3">
                 <Sparkles className="size-12 opacity-20" />
-                <p className="text-sm">{emptyStateMessage}</p>
+                <p className="text-sm">{t(emptyStateMessage)}</p>
               </div>
 
               {suggestedPrompts && suggestedPrompts.length > 0 && (
@@ -225,11 +227,11 @@ export function AIChatBox({
                   {suggestedPrompts.map((prompt, index) => (
                     <button
                       key={index}
-                      onClick={() => onSendMessage(prompt)}
+                      onClick={() => onSendMessage(t(prompt))}
                       disabled={isLoading}
                       className="rounded-lg border border-border bg-card px-4 py-2 text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {prompt}
+                      {t(prompt)}
                     </button>
                   ))}
                 </div>
@@ -284,10 +286,10 @@ export function AIChatBox({
                               type="button"
                               className="chat-read-button"
                               onClick={() => readingIndex === index ? onStopReading?.() : onReadMessage(message.content, index)}
-                              aria-label={readingIndex === index ? "Stop reading this answer" : "Read this answer aloud"}
+                              aria-label={readingIndex === index ? t("Stop reading this answer") : t("Read this answer aloud")}
                             >
                               {readingIndex === index ? <VolumeX size={17} /> : <Volume2 size={17} />}
-                              <span>{readingIndex === index ? "Stop" : "Read aloud"}</span>
+                              <span>{readingIndex === index ? t("Stop") : t("Read aloud")}</span>
                             </button>
                           )}
                         </>
@@ -340,7 +342,8 @@ export function AIChatBox({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={t(placeholder)}
+          aria-label={t("Your message")}
           className="flex-1 max-h-32 resize-none min-h-9"
           rows={1}
         />
@@ -349,6 +352,7 @@ export function AIChatBox({
           size="icon"
           disabled={!input.trim() || isLoading}
           className="shrink-0 h-[38px] w-[38px]"
+          aria-label={t("Send message")}
         >
           {isLoading ? (
             <Loader2 className="size-4 animate-spin" />

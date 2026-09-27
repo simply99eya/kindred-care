@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { getBrowserSpeechRecognition, type BrowserSpeechRecognition } from "@/lib/browserSpeechRecognition";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { speechLocaleForLanguage } from "@/lib/translations";
 import { Mic, MicOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export default function SpeechToTextButton({ fieldName, onTranscript, language = "en-US" }: { fieldName: string; onTranscript: (transcript: string) => void; language?: string }) {
+export default function SpeechToTextButton({ fieldName, onTranscript, language }: { fieldName: string; onTranscript: (transcript: string) => void; language?: string }) {
+  const { language: appLanguage, t } = useLanguage();
+  const recognitionLanguage = language ?? speechLocaleForLanguage(appLanguage);
+  const translatedFieldName = t(fieldName);
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState("");
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
@@ -23,24 +28,24 @@ export default function SpeechToTextButton({ fieldName, onTranscript, language =
       try { recognitionRef.current?.stop(); } catch { /* Recognition may already be stopping. */ }
       listeningRef.current = false;
       setListening(false);
-      setStatus("Dictation stopped.");
+      setStatus(t("Dictation stopped."));
       return;
     }
     const Recognition = getBrowserSpeechRecognition();
     if (!Recognition) {
-      setStatus("Speech input isn't available in this browser. You can type instead.");
+      setStatus(t("Speech input isn't available in this browser. You can type instead."));
       return;
     }
     try {
       const recognition = new Recognition();
-      recognition.lang = language;
+      recognition.lang = recognitionLanguage;
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.onresult = (event) => {
         const transcript = Array.from(event.results).map((result) => result[0]?.transcript ?? "").filter(Boolean).join(" ").trim();
         if (transcript) {
           onTranscriptRef.current(transcript);
-          setStatus("Speech added to this text field.");
+          setStatus(t("Speech added to this text field."));
         }
       };
       recognition.onerror = (event) => {
@@ -51,7 +56,7 @@ export default function SpeechToTextButton({ fieldName, onTranscript, language =
             : event.error === "audio-capture"
               ? "No microphone is available. You can type instead."
               : "Speech input couldn't start. Please try again or type instead.";
-        setStatus(message);
+        setStatus(t(message));
       };
       recognition.onend = () => {
         listeningRef.current = false;
@@ -60,22 +65,22 @@ export default function SpeechToTextButton({ fieldName, onTranscript, language =
       };
       recognitionRef.current = recognition;
       listeningRef.current = true;
-      setStatus("Listening. Speak now, then pause to add the text.");
+      setStatus(t("Listening. Speak now, then pause to add the text."));
       setListening(true);
       recognition.start();
     } catch {
       listeningRef.current = false;
       recognitionRef.current = null;
       setListening(false);
-      setStatus("Speech input couldn't start. Please type instead.");
+      setStatus(t("Speech input couldn't start. Please type instead."));
     }
   };
 
   return <span className="dictation-control">
-    <Button type="button" variant="outline" size="sm" className="dictation-button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? `Stop speaking ${fieldName}` : `Speak ${fieldName}`} title={supported ? `Speak ${fieldName}` : "Voice input is not available in this browser"}>
+    <Button type="button" variant="outline" size="sm" className="dictation-button" onClick={toggleListening} aria-pressed={listening} aria-label={listening ? t("Stop speaking {{field}}", { field: translatedFieldName }) : t("Speak {{field}}", { field: translatedFieldName })} title={supported ? t("Speak {{field}}", { field: translatedFieldName }) : t("Voice input is not available in this browser")}>
       {listening ? <MicOff size={15} /> : <Mic size={15} />}
-      {listening ? "Stop" : supported ? "Speak" : "Voice unavailable"}
+      {listening ? t("Stop") : supported ? t("Speak") : t("Voice unavailable")}
     </Button>
-    {status && <small className="dictation-status" role={status.includes("permission") || status.includes("available") || status.includes("microphone") || status.includes("couldn't") ? "alert" : "status"} aria-live="polite">{status}</small>}
+    {status && <small className="dictation-status" role={status.includes("permission") || status.includes("available") || status.includes("microphone") || status.includes("couldn't") || status.includes("لم") || status.includes("تعذر") || status.includes("غير متاح") ? "alert" : "status"} aria-live="polite">{status}</small>}
   </span>;
 }

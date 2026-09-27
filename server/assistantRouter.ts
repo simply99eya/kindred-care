@@ -7,7 +7,7 @@ import { isValidDateKey } from "./careRules";
 import { protectedProcedure, router } from "./_core/trpc";
 
 export const assistantRouter = router({
-  ask: protectedProcedure.input(z.object({ message: z.string().trim().min(1).max(1000), dateKey: z.string().refine(isValidDateKey) })).mutation(async ({ ctx, input }) => {
+  ask: protectedProcedure.input(z.object({ message: z.string().trim().min(1).max(1000), dateKey: z.string().refine(isValidDateKey), language: z.enum(["en", "ar"]).default("en") })).mutation(async ({ ctx, input }) => {
     const db = await requireDb();
     const items = await db.select({ title: activities.title, startTime: activities.startTime, status: activities.status })
       .from(activities).where(and(eq(activities.userId, ctx.user.id), eq(activities.dateKey, input.dateKey)))
@@ -19,6 +19,6 @@ export const assistantRouter = router({
       minute: "2-digit",
       hourCycle: "h23",
     }).format(new Date());
-    return { text: answerFromSavedSchedule(input.message, input.dateKey, items, localTime), mode: "demo" as const };
+    return { text: answerFromSavedSchedule(input.message, input.dateKey, items, localTime, input.language), mode: "demo" as const };
   }),
 });
