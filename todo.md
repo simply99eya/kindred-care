@@ -1,8 +1,9 @@
-# Kindred Care — feature and delivery tracker
+# We Care — feature and delivery tracker
 
 ## Delivery checklist — complete
 
 - [x] Responsive landing page, authenticated app shell, clear sign-in path, and resumable onboarding.
+- [x] Logo-based We Care branding: supplied wordmark, raspberry/navy palette, matching browser title, and updated public/app copy.
 - [x] Persistent user profile, daily activities, and familiar-person records.
 - [x] Calendar, daily agenda, activity CRUD, completion controls, and reminder times.
 - [x] Past-day view-only behavior and server-side enforcement for edits, rescheduling, completion, and deletion.
@@ -12,10 +13,11 @@
 - [x] Photo-check demo uses no recognition model, avoids false identity claims, and provides a manual, uncertainty-aware fallback.
 - [x] Schedule-only deterministic companion is clearly marked as demo mode; answers use the signed-in user's saved schedule only.
 - [x] Shared text-to-speech controls, replay/stop handling, speech-rate preference, optional browser speech input, and graceful unsupported-browser messages.
+- [x] Additive speech-to-text controls for onboarding, calendar activities, familiar-person details, and profile preferences; existing typed entry and companion voice-question flow remain available.
 - [x] Foreground browser reminders with permission flow, duplicate suppression, and clear warning that this is not an urgent-care channel.
 - [x] Help/settings, privacy explanation, caregiver/support-person view, and accessible keyboard-managed dialogs.
 - [x] Architecture, local run, environment setup, deployment steps, test results, and known limitations documented in `README.md` and `ENVIRONMENT.md`.
-- [x] Verification completed: TypeScript passes; 10/10 Vitest tests pass; production frontend/server build succeeds; desktop and mobile landing/onboarding previews reviewed.
+- [x] Verification completed: TypeScript passes; 14/14 Vitest tests pass; production frontend/server build succeeds; desktop and mobile landing/dashboard previews reviewed.
 - [x] Source archive created with project code/docs and lockfile; dependencies/build artifacts and all dotenv files excluded.
 
 ## Handoff boundaries (informational; do not imply a connected service)

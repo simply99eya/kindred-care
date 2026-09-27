@@ -20,6 +20,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
+import BrandLockup from "@/components/BrandLockup";
 import { useIsMobile } from "@/hooks/useMobile";
 import { CalendarDays, CircleHelp, House, LogOut, MessageCircle, PanelLeft, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -160,7 +161,7 @@ function DashboardLayoutContent({
           className="border-r-0"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
+          <SidebarHeader className="h-20 justify-center">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
@@ -169,13 +170,7 @@ function DashboardLayoutContent({
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
-              {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-semibold tracking-tight truncate">
-                      Kindred Care
-                  </span>
-                </div>
-              ) : null}
+              {!isCollapsed ? <BrandLockup size="sidebar" /> : null}
             </div>
           </SidebarHeader>
 

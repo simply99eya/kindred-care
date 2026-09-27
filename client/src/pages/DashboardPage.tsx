@@ -107,7 +107,7 @@ export default function DashboardPage() {
         <div className="section-head"><div><h2>Demo samples</h2><p>Optional fictional examples for a quick walkthrough. Reset affects sample records only.</p></div></div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           <Button variant="outline" onClick={() => loadDemo.mutate()} disabled={loadDemo.isPending}><Play size={16} />{loadDemo.isPending ? "Adding…" : hasSamples ? "Samples already loaded" : "Load sample day"}</Button>
-          {hasSamples && <Button variant="ghost" onClick={() => { if (window.confirm("Remove only the fictional Kindred Care demo samples? Your own activities and people will not be changed.")) resetDemo.mutate(); }} disabled={resetDemo.isPending}><RotateCcw size={16} />Reset demo samples</Button>}
+          {hasSamples && <Button variant="ghost" onClick={() => { if (window.confirm("Remove only the fictional We Care demo samples? Your own activities and people will not be changed.")) resetDemo.mutate(); }} disabled={resetDemo.isPending}><RotateCcw size={16} />Reset demo samples</Button>}
         </div>
       </section>
     </div>

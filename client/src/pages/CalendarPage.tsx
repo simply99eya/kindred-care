@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { DialogFrame } from "@/components/DialogFrame";
+import SpeechToTextButton from "@/components/SpeechToTextButton";
 import { useSpeech } from "@/contexts/SpeechContext";
 import { dateKeyInTimezone, shiftDateKey } from "@/lib/careDates";
+import { appendTranscription } from "@/lib/speechText";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, LockKeyhole, Plus, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
@@ -134,8 +136,8 @@ function ActivityForm({ selectedDate, activity, onClose, onSaved }: { selectedDa
       <h2 id="activity-form-title">{activity ? "Edit activity" : "Add an activity"}</h2>
       <p>Keep the details short and easy to remember.</p>
       <form onSubmit={submit}>
-        <label className="field-label" htmlFor="activity-title">Activity</label><input autoFocus required id="activity-title" className="care-input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} placeholder="For example, visit with family" />
-        <label className="field-label" htmlFor="activity-notes">A helpful note <span className="optional">(optional)</span></label><textarea id="activity-notes" className="care-input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} placeholder="A short description" />
+        <div className="dictation-field-heading"><label className="field-label" htmlFor="activity-title">Activity</label><SpeechToTextButton fieldName="activity title" onTranscript={(text) => setTitle((current) => appendTranscription(current, text))} /></div><input autoFocus required id="activity-title" className="care-input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} placeholder="For example, visit with family" />
+        <div className="dictation-field-heading"><label className="field-label" htmlFor="activity-notes">A helpful note <span className="optional">(optional)</span></label><SpeechToTextButton fieldName="activity note" onTranscript={(text) => setNotes((current) => appendTranscription(current, text))} /></div><textarea id="activity-notes" className="care-input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} placeholder="A short description" />
         <div className="field-row"><label className="field-grow"><span className="field-label">Day</span><input className="care-input" type="date" value={dateKey} onChange={(e) => setDateKey(e.target.value)} required /></label><label className="field-grow"><span className="field-label">Time</span><input className="care-input" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required /></label></div>
         <div className="field-row"><label className="field-grow"><span className="field-label">Type</span><select className="care-input" value={category} onChange={(e) => setCategory(e.target.value as Activity["category"])}><option value="routine">Routine</option><option value="appointment">Appointment</option><option value="visit">Visit</option><option value="reminder">Reminder</option><option value="rest">Rest</option><option value="other">Other</option></select></label><label className="field-grow"><span className="field-label">Reminder <span className="optional">(optional)</span></span><input className="care-input" type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} /></label></div>
         <p className="gentle-note">Reminders appear while this app is open. This demo does not schedule background notifications.</p>

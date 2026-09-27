@@ -1,6 +1,6 @@
-# Kindred Care
+# We Care — Health & Wellbeing
 
-A calm, accessible daily companion for people living with memory loss and their caregivers. Kindred Care is a supportive organizing tool—not a diagnostic tool or replacement for professional care.
+A calm, accessible daily companion for people living with memory loss and their caregivers. We Care is a supportive organizing tool—not a diagnostic tool or replacement for professional care.
 
 ## Architecture
 
@@ -16,6 +16,7 @@ graph LR
 - **Frontend:** React, TypeScript, Tailwind CSS, Wouter routes, and the template's accessible UI components.
 - **Backend:** Express + tRPC with Manus OAuth. Feature procedures require an authenticated user and filter records by that user's ID.
 - **Persistence:** Drizzle ORM over MySQL/TiDB. User profiles, daily activities, and familiar-person details persist in separate tables.
+- **Branding:** The supplied We Care wordmark is held in project storage and displayed by `client/src/components/BrandLockup.tsx`. The source archive includes a cropped `we-care-logo.jpg`; for a different deployment, upload it to that project's storage and update the component's storage path.
 - **Photos:** Sent to the server only after the caregiver checks the consent acknowledgment; the server also enforces that acknowledgment, verifies JPEG/PNG/WebP byte signatures, and limits uploads to 5 MB after client-side resizing. Photos are stored in private object storage and referenced by a user-scoped key. The browser receives a short-lived signed URL only after an authenticated ownership check.
 - **AI:** No external AI model is connected. The companion is explicitly in **demo mode**: its schedule answers are generated on the server from the signed-in user's saved activities, and it says when information is absent. It does not diagnose, recommend treatment, or invent appointments.
 - **Recognition:** No face-recognition service/model is connected. The capture demonstration does not upload its image; it clearly reports uncertainty and provides manual browsing instead.
@@ -29,6 +30,7 @@ graph LR
 - Familiar-person profiles with name, relationship, description, device camera or file selection, photo preview/replace/remove, photo-consent acknowledgement, private upload, and caregiver-only edits.
 - Truthful manual recognition fallback; no claim of face identity.
 - Schedule-aware demo companion, repeated answers via text-to-speech, stop/restart control, configurable speech rate, and optional browser speech input.
+- Tap-to-dictate for profile, activity, and familiar-person text fields on browsers that support Web Speech recognition; spoken text appends to existing text, and typing remains available. Audio processing and permissions are controlled by the user's browser/device, not this app.
 - Browser notification permission flow and foreground reminders with duplicate suppression. No background push service is configured.
 - Caregiver/support-person interface view, help, privacy explanation, and preference settings.
 - Sample records are tagged as demo data; reset removes only those tagged sample activities/people, not user-created records. Editing or completing a sample converts it to a user-owned record so a later reset will keep that work.

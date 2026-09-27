@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
+import BrandLockup from "@/components/BrandLockup";
+import SpeechToTextButton from "@/components/SpeechToTextButton";
 import { trpc } from "@/lib/trpc";
 import { dateKeyInTimezone, localClock, shiftDateKey } from "@/lib/careDates";
+import { appendTranscription } from "@/lib/speechText";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, HeartHandshake, LoaderCircle, MessageCircle, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -55,15 +58,15 @@ function OnboardingWizard({ profile, accountName }: { profile: NonNullable<Retur
   return (
     <main className="onboarding-shell">
       <section className="onboarding-card" aria-labelledby="onboarding-title">
-        <div className="brand-lockup"><span className="brand-mark"><HeartHandshake size={23} /></span><span>Kindred Care</span></div>
+        <BrandLockup size="onboarding" />
         <div className="onboarding-progress" aria-label={`Step ${Math.min(step + 1, 3)} of 3`}>
           {[0, 1, 2].map((number) => <span key={number} className={number <= step ? "progress-dot active" : "progress-dot"} />)}
         </div>
         {step === 0 ? <>
           <div className="onboarding-kicker">A little support, at your pace</div>
           <h1 id="onboarding-title">Welcome. Let's make this feel like yours.</h1>
-          <p className="onboarding-lede">Kindred Care brings today's plans, familiar faces and gentle reminders into one calm place.</p>
-          <label className="field-label" htmlFor="displayName">What should we call you?</label>
+          <p className="onboarding-lede">We Care brings today's plans, familiar faces and gentle reminders into one calm place.</p>
+          <div className="dictation-field-heading"><label className="field-label" htmlFor="displayName">What should we call you?</label><SpeechToTextButton fieldName="your name" onTranscript={(text) => setDisplayName((current) => appendTranscription(current, text))} /></div>
           <input id="displayName" className="care-input" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Your first name" maxLength={120} />
           <p className="field-label">Which best describes you?</p>
           <div className="role-options">
@@ -81,7 +84,7 @@ function OnboardingWizard({ profile, accountName }: { profile: NonNullable<Retur
           <div className="onboarding-kicker">One more detail</div>
           <h1 id="onboarding-title">Who are we supporting together?</h1>
           <p className="onboarding-lede">You can add a name now or come back to it later. We only use it to make the day feel more personal.</p>
-          <label className="field-label" htmlFor="supportedName">Person's name <span className="optional">(optional)</span></label>
+          <div className="dictation-field-heading"><label className="field-label" htmlFor="supportedName">Person's name <span className="optional">(optional)</span></label><SpeechToTextButton fieldName="the person's name" onTranscript={(text) => setSupportedName((current) => appendTranscription(current, text))} /></div>
           <input id="supportedName" className="care-input" value={supportedName} onChange={(event) => setSupportedName(event.target.value)} placeholder="For example, Alex" maxLength={120} />
           <div className="privacy-note"><Check size={18} /><p>Your information stays within your signed-in care space. You can change it any time.</p></div>
           {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
@@ -92,7 +95,7 @@ function OnboardingWizard({ profile, accountName }: { profile: NonNullable<Retur
           <div className="tour-list">
             <div className="tour-item"><span><CalendarDays size={21} /></span><div><strong>Today & Calendar</strong><p>See what's planned. Past days stay view-only.</p></div></div>
             <div className="tour-item"><span><Users size={21} /></span><div><strong>People I Know</strong><p>Save familiar people and their photos with permission.</p></div></div>
-            <div className="tour-item"><span><MessageCircle size={21} /></span><div><strong>Kindred Companion</strong><p>Ask about saved plans. It won't guess or give medical advice.</p></div></div>
+            <div className="tour-item"><span><MessageCircle size={21} /></span><div><strong>We Care Companion</strong><p>Ask about saved plans. It won't guess or give medical advice.</p></div></div>
           </div>
           <p className="gentle-note">This is a supportive companion, not a medical tool or a replacement for professional care.</p>
           {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
@@ -128,7 +131,7 @@ function ReminderMonitor({ profile }: { profile: NonNullable<ReturnType<typeof u
         localStorage.setItem(key, "1");
         const body = `It's time for ${activity.title}.`;
         if (profile.notificationsEnabled && "Notification" in window && Notification.permission === "granted") {
-          new Notification("Kindred Care reminder", { body });
+          new Notification("We Care reminder", { body });
         } else {
           toast.message("A gentle reminder", { description: body });
         }

@@ -2,28 +2,11 @@ import { Button } from "@/components/ui/button";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { useSpeech } from "@/contexts/SpeechContext";
 import { dateKeyInTimezone } from "@/lib/careDates";
+import { getBrowserSpeechRecognition, type BrowserSpeechRecognition } from "@/lib/browserSpeechRecognition";
 import { trpc } from "@/lib/trpc";
 import { CalendarDays, Mic, MicOff, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-type BrowserRecognition = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
-
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => BrowserRecognition;
-    webkitSpeechRecognition?: new () => BrowserRecognition;
-  }
-}
 
 export default function AssistantPage() {
   const profileQuery = trpc.care.profile.get.useQuery();
@@ -33,7 +16,7 @@ export default function AssistantPage() {
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const [listening, setListening] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const recognitionRef = useRef<BrowserRecognition | null>(null);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const speech = useSpeech();
   const ask = trpc.care.assistant.ask.useMutation();
 
@@ -41,7 +24,7 @@ export default function AssistantPage() {
     if (!dateKey && profile) setDateKey(dateKeyInTimezone(profile.timezone));
   }, [dateKey, profile]);
   useEffect(() => {
-    setVoiceAvailable(Boolean(window.SpeechRecognition || window.webkitSpeechRecognition));
+    setVoiceAvailable(Boolean(getBrowserSpeechRecognition()));
   }, []);
   useEffect(() => () => recognitionRef.current?.stop(), []);
 
@@ -56,7 +39,7 @@ export default function AssistantPage() {
   };
 
   const startVoiceInput = () => {
-    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const Recognition = getBrowserSpeechRecognition();
     if (!Recognition) { toast.message("Voice input isn't available in this browser. You can type instead."); return; }
     try {
       const recognition = new Recognition();
@@ -84,7 +67,7 @@ export default function AssistantPage() {
   };
 
   return <main className="page-wrap">
-    <div className="assistant-intro"><span className="page-kicker"><Sparkles size={15} /> A friendly guide</span><h1 className="page-title">Kindred Companion</h1><p className="page-subtitle">Ask a simple question about the saved plan or how to find something in the app.</p></div>
+    <div className="assistant-intro"><span className="page-kicker"><Sparkles size={15} /> A friendly guide</span><h1 className="page-title">We Care Companion</h1><p className="page-subtitle">Ask a simple question about the saved plan or how to find something in the app.</p></div>
     <div className="chat-warning"><strong>Demo guide:</strong> This schedule helper reads only the activities saved for the selected day. It is not connected to an external AI model and does not provide medical advice. If something isn't in the calendar, it will say so.</div>
     <div className="assistant-shell">
       <div className="settings-row" style={{ padding: "13px 17px", background: "#f8faf5" }}><div><strong><CalendarDays size={15} style={{ verticalAlign: "-3px", marginRight: 6 }} />Ask about a day</strong><small>Answers use saved activities only.</small></div><input className="care-input settings-control" type="date" aria-label="Choose the day for schedule questions" value={dateKey} onChange={(event) => setDateKey(event.target.value)} /></div>
@@ -103,6 +86,6 @@ export default function AssistantPage() {
       />
     </div>
     <div style={{ width: "min(840px, 100%)", margin: "14px auto", display: "flex", justifyContent: "flex-end" }}><Button variant="outline" onClick={startVoiceInput} disabled={!voiceAvailable || listening || ask.isPending} title={voiceAvailable ? "Speak a question" : "Voice input is not available in this browser"}><Mic size={17} />{listening ? "Listening…" : voiceAvailable ? "Ask by voice" : "Voice input unavailable"}</Button>{listening && <Button variant="ghost" onClick={() => { recognitionRef.current?.stop(); setListening(false); }}><MicOff size={17} />Stop</Button>}</div>
-    <div className="chat-warning">For changes to a person's care or medication, please speak with their care team. Kindred Care is a supportive companion, not a medical service.</div>
+    <div className="chat-warning">For changes to a person's care or medication, please speak with their care team. We Care is a supportive companion, not a medical service.</div>
   </main>;
 }
