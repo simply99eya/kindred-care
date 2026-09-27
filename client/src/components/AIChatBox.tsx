@@ -2,9 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Loader2, Send, User, Sparkles } from "lucide-react";
+import { Loader2, Send, User, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { Streamdown } from "streamdown";
 
 /**
  * Message type matching server-side LLM Message interface
@@ -57,7 +56,19 @@ export type AIChatBoxProps = {
    * Click to send directly
    */
   suggestedPrompts?: string[];
+  onReadMessage?: (content: string, index: number) => void;
+  readingIndex?: number | null;
+  onStopReading?: () => void;
 };
+
+function PlainAssistantText({ content }: { content: string }) {
+  const parts = content.split(/(\*\*[^*]+\*\*)/g);
+  return <p className="whitespace-pre-wrap text-sm">{parts.map((part, index) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={index}>{part.slice(2, -2)}</strong>
+      : <span key={index}>{part}</span>
+  )}</p>;
+}
 
 /**
  * A ready-to-use AI chat box component that integrates with the LLM system.
@@ -119,6 +130,9 @@ export function AIChatBox({
   height = "600px",
   emptyStateMessage = "Start a conversation with AI",
   suggestedPrompts,
+  onReadMessage,
+  readingIndex = null,
+  onStopReading,
 }: AIChatBoxProps) {
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -261,9 +275,22 @@ export function AIChatBox({
                       )}
                     >
                       {message.role === "assistant" ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <Streamdown>{message.content}</Streamdown>
-                        </div>
+                        <>
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <PlainAssistantText content={message.content} />
+                          </div>
+                          {onReadMessage && (
+                            <button
+                              type="button"
+                              className="chat-read-button"
+                              onClick={() => readingIndex === index ? onStopReading?.() : onReadMessage(message.content, index)}
+                              aria-label={readingIndex === index ? "Stop reading this answer" : "Read this answer aloud"}
+                            >
+                              {readingIndex === index ? <VolumeX size={17} /> : <Volume2 size={17} />}
+                              <span>{readingIndex === index ? "Stop" : "Read aloud"}</span>
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <p className="whitespace-pre-wrap text-sm">
                           {message.content}
